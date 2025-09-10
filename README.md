@@ -70,7 +70,7 @@ Important: if no tables are found, you need to make sure that the user is in the
 
 \c database_name
 
-в psql
+command in psql for add database_name
 
 ```
 sudo -u postgres psql

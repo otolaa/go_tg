@@ -93,18 +93,10 @@ func setTest(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("it's ok, v" + config.VERSION))
 }
 
-func handleButton(bot *tgbotapi.BotAPI, callback *tgbotapi.CallbackQuery) {
-
-	mid := callback.Message.Chat.ID
-
-	// Извлечь данные обратного вызова
-	data := callback.Data
+func getCallbackData(data string) (uint, bool) {
 	commandParams := strings.Split(data, "_")
 
-	uid64, err := strconv.Atoi(commandParams[1])
-	if err != nil {
-		return
-	}
+	uid64, _ := strconv.Atoi(commandParams[1])
 
 	sending := true
 	switch commandParams[0] {
@@ -114,9 +106,17 @@ func handleButton(bot *tgbotapi.BotAPI, callback *tgbotapi.CallbackQuery) {
 		sending = false
 	}
 
-	p(4, " ~ ", PL, mid, data)
+	return uint(uid64), sending
+}
 
-	us := config.SetUserSending(uint(uid64), sending)
+func handleButton(bot *tgbotapi.BotAPI, callback *tgbotapi.CallbackQuery) {
+	// Извлечь данные обратного вызова
+	data := callback.Data
+	uid, sending := getCallbackData(data)
+
+	p(4, " ~ ", PL, uid, sending, data)
+
+	us := config.SetUserSending(uid, sending)
 	nameButton, valueButton, callbackButton := getButtonSending(&us)
 
 	// Ответить на запрос обратного вызова
@@ -253,7 +253,7 @@ func main() {
 		case update.Message != nil:
 			handleMessage(bot, update.Message)
 
-			// Handle button clicks
+		// Handle button clicks
 		case update.CallbackQuery != nil:
 			handleButton(bot, update.CallbackQuery)
 		}

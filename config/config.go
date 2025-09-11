@@ -60,28 +60,28 @@ func init() {
 	DB = db
 }
 
-func SetUser(db *gorm.DB, tid int64, userName string) User {
+func SetUser(tid int64, userName string) User {
 	var us User
 	us.Tid = tid
 	us.Name = userName
 	us.Sending = true
 	us.Active = true
-	db.FirstOrCreate(&us, User{Tid: tid})
+	DB.FirstOrCreate(&us, User{Tid: tid})
 
 	return us
 }
 
-func GetListUsers(db *gorm.DB) []User {
+func GetListUsers() []User {
 	var users []User
-	db.Select("id", "tid", "name").Where("active = ?", true).Where("sending = ?", true).Find(&users)
+	DB.Select("id", "tid", "name").Where("active = ?", true).Where("sending = ?", true).Find(&users)
 
 	return users
 }
 
-func SetUserSending(db *gorm.DB, uid uint, sending bool) User {
+func SetUserSending(uid uint, sending bool) User {
 	var us User
 	us.ID = uid
-	db.Model(&us).Update("sending", sending)
+	DB.Model(&us).Update("sending", sending)
 
 	return us
 }

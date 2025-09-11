@@ -116,7 +116,7 @@ func handleButton(bot *tgbotapi.BotAPI, callback *tgbotapi.CallbackQuery) {
 
 	p(4, " ~ ", PL, mid, data)
 
-	us := config.SetUserSending(config.DB, uint(uid64), sending)
+	us := config.SetUserSending(uint(uid64), sending)
 	nameButton, valueButton, callbackButton := getButtonSending(&us)
 
 	// Ответить на запрос обратного вызова
@@ -145,7 +145,7 @@ func handleMessage(bot *tgbotapi.BotAPI, message *tgbotapi.Message) {
 		userName = message.Chat.Title
 	}
 
-	user := config.SetUser(config.DB, message.Chat.ID, userName)
+	user := config.SetUser(message.Chat.ID, userName)
 	// ~~~ end
 
 	if setStartCommand(bot, message) {
@@ -252,12 +252,10 @@ func main() {
 		// Handle messages
 		case update.Message != nil:
 			handleMessage(bot, update.Message)
-			break
 
 			// Handle button clicks
 		case update.CallbackQuery != nil:
 			handleButton(bot, update.CallbackQuery)
-			break
 		}
 	}
 }

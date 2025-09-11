@@ -23,6 +23,7 @@ type User struct {
 	ID      uint   `gorm:"primarykey"`
 	Tid     int64  `gorm:"unique_index"`
 	Name    string `gorm:"size:255"`
+	Active  bool   `gorm:"type:bool"`
 	Sending bool   `gorm:"type:bool"`
 }
 
@@ -64,6 +65,7 @@ func SetUser(db *gorm.DB, tid int64, userName string) User {
 	us.Tid = tid
 	us.Name = userName
 	us.Sending = true
+	us.Active = true
 	db.FirstOrCreate(&us, User{Tid: tid})
 
 	return us
@@ -71,7 +73,7 @@ func SetUser(db *gorm.DB, tid int64, userName string) User {
 
 func GetListUsers(db *gorm.DB) []User {
 	var users []User
-	db.Select("id", "tid", "name").Where("sending = ?", true).Find(&users)
+	db.Select("id", "tid", "name").Where("active = ?", true).Where("sending = ?", true).Find(&users)
 
 	return users
 }

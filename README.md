@@ -66,6 +66,13 @@ sudo systemctl disable go_tg
 
 ## 🍎 PostgreSQL
 
+add table
+```
+sudo -u postgres psql
+CREATE DATABASE go_tg;
+ALTER DATABASE go_tg OWNER TO www;
+```
+
 Important: if no tables are found, you need to make sure that the user is in the correct database — to switch, you can use the command
 
 \c database_name
@@ -74,7 +81,7 @@ command in psql for add database_name
 
 ```
 sudo -u postgres psql
-\c database_name
+\c go_tg
 \dt table_name_users
 SELECT * FROM table_name_users;
 ```

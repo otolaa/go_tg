@@ -35,6 +35,14 @@ func LoadJsonItems(filePath string) ([]ItemJson, error) {
 	return obj, nil
 }
 
+func SetReplaces(text string) string {
+	for _, name := range []string{"Показать цитату целиком"} {
+		text = strings.Replace(text, name, "", -1)
+	}
+
+	return text
+}
+
 func GetQuote() string {
 	quote, err := LoadJsonItems("./stivenking/stiven-king_09-08-2025_12.json")
 	if err != nil {
@@ -46,7 +54,7 @@ func GetQuote() string {
 	index := rand.Intn(len(quote))
 
 	msg := []string{
-		quote[index].Body,
+		SetReplaces(quote[index].Body),
 		strings.Repeat("~", 39),
 	}
 

@@ -116,8 +116,8 @@ func handleButton(bot *tgbotapi.BotAPI, callback *tgbotapi.CallbackQuery) {
 
 	p(4, " ~ ", PL, uid, sending, data)
 
-	us := config.SetUserSending(uid, sending)
-	nameButton, valueButton, callbackButton := getButtonSending(&us)
+	user := config.SetUserSending(uid, sending)
+	nameButton, valueButton, callbackButton := getButtonSending(&user)
 
 	// Ответить на запрос обратного вызова
 	callbackMess := tgbotapi.NewCallback(callback.ID, callbackButton)
@@ -148,16 +148,15 @@ func handleMessage(bot *tgbotapi.BotAPI, message *tgbotapi.Message) {
 	user := config.SetUser(message.Chat.ID, userName)
 	// ~~~ end
 
-	if setStartCommand(bot, message) {
-		return
-	}
+	switch {
+	case strings.HasPrefix(message.Text, "/start"):
+		setStartCommand(bot, message)
 
-	if setSettingsCommand(bot, message, &user) {
-		return
-	}
+	case strings.HasPrefix(message.Text, "/settings"):
+		setSettingsCommand(bot, message, &user)
 
-	if setDefaultMessage(bot, message) {
-		return
+	case strings.Contains(message.Text, "?"):
+		setDefaultMessage(bot, message)
 	}
 }
 
@@ -175,11 +174,7 @@ func getButtonSending(user *config.User) (string, string, string) {
 	return nameButton, valueButton, callbackButton
 }
 
-func setSettingsCommand(bot *tgbotapi.BotAPI, message *tgbotapi.Message, user *config.User) bool {
-	if !strings.HasPrefix(message.Text, "/settings") {
-		return false
-	}
-
+func setSettingsCommand(bot *tgbotapi.BotAPI, message *tgbotapi.Message, user *config.User) {
 	msgArr := []string{
 		"🎲 → Случайные цитаты из книг.",
 		SuffixLine,
@@ -202,16 +197,10 @@ func setSettingsCommand(bot *tgbotapi.BotAPI, message *tgbotapi.Message, user *c
 		),
 	)
 	bot.Send(msg)
-
-	return true
 }
 
 // command start
-func setStartCommand(bot *tgbotapi.BotAPI, message *tgbotapi.Message) bool {
-	if !strings.HasPrefix(message.Text, "/start") {
-		return false
-	}
-
+func setStartCommand(bot *tgbotapi.BotAPI, message *tgbotapi.Message) {
 	msgArr := []string{
 		"Задайте свой вопрос, не забудьте `?`",
 		"Ответом на вопрос будит цитата из книг.",
@@ -221,20 +210,13 @@ func setStartCommand(bot *tgbotapi.BotAPI, message *tgbotapi.Message) bool {
 
 	msg := tgbotapi.NewMessage(message.Chat.ID, strings.Join(msgArr, NS))
 	bot.Send(msg)
-
-	return true
 }
 
 // default message
-func setDefaultMessage(bot *tgbotapi.BotAPI, message *tgbotapi.Message) bool {
-	if !strings.Contains(message.Text, "?") {
-		return false
-	}
-
+func setDefaultMessage(bot *tgbotapi.BotAPI, message *tgbotapi.Message) {
 	msg := tgbotapi.NewMessage(message.Chat.ID, stivenking.GetQuote())
 	msg.ReplyToMessageID = message.MessageID
 	bot.Send(msg)
-	return true
 }
 
 func main() {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"go_tg/config"
 	"go_tg/stivenking"
@@ -93,10 +94,16 @@ func setTest(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("it's ok, v" + config.VERSION))
 }
 
-func getCallbackData(data string) (uint, bool) {
+func getCallbackData(data string) (uint, bool, error) {
 	commandParams := strings.Split(data, "_")
+	if len(commandParams) < 2 {
+		return 0, false, errors.New("command is not array")
+	}
 
-	uid64, _ := strconv.Atoi(commandParams[1])
+	uid64, err := strconv.Atoi(commandParams[1])
+	if err != nil {
+		return 0, false, err
+	}
 
 	sending := true
 	switch commandParams[0] {
@@ -106,13 +113,16 @@ func getCallbackData(data string) (uint, bool) {
 		sending = false
 	}
 
-	return uint(uid64), sending
+	return uint(uid64), sending, err
 }
 
 func handleButton(bot *tgbotapi.BotAPI, callback *tgbotapi.CallbackQuery) {
 	// Извлечь данные обратного вызова
 	data := callback.Data
-	uid, sending := getCallbackData(data)
+	uid, sending, err := getCallbackData(data)
+	if err != nil {
+		return
+	}
 
 	p(4, " ~ ", PL, uid, sending, data)
 

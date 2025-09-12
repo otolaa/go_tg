@@ -96,37 +96,34 @@ func setTest(w http.ResponseWriter, r *http.Request) {
 
 func getCallbackData(data string) (uint, bool, error) {
 	commandParams := strings.Split(data, "_")
-	if len(commandParams) < 2 {
+	if len(commandParams) < 3 {
 		return 0, false, errors.New("command is not array")
 	}
 
-	uid64, err := strconv.Atoi(commandParams[1])
+	uid64, err := strconv.Atoi(commandParams[2])
 	if err != nil {
 		return 0, false, err
 	}
 
-	sending := true
-	switch commandParams[0] {
-	case "active":
-		sending = true
-	case "disable":
-		sending = false
+	boolValue, err := strconv.ParseBool(commandParams[1])
+	if err != nil {
+		return 0, false, err
 	}
 
-	return uint(uid64), sending, err
+	return uint(uid64), boolValue, err
 }
 
 func handleButton(bot *tgbotapi.BotAPI, callback *tgbotapi.CallbackQuery) {
 	// Извлечь данные обратного вызова
 	data := callback.Data
-	uid, sending, err := getCallbackData(data)
+	uid, boolValue, err := getCallbackData(data)
 	if err != nil {
 		return
 	}
 
-	p(4, " ~ ", PL, uid, sending, data)
+	p(4, " ~ ", PL, uid, boolValue, data)
 
-	user := config.SetUserSending(uid, sending)
+	user := config.SetUserSending(uid, boolValue)
 	nameButton, valueButton, callbackButton := getButtonSending(&user)
 
 	// Ответить на запрос обратного вызова
@@ -172,12 +169,12 @@ func handleMessage(bot *tgbotapi.BotAPI, message *tgbotapi.Message) {
 
 func getButtonSending(user *config.User) (string, string, string) {
 	nameButton := "❌ Выключить рассылку"
-	valueButton := fmt.Sprintf("disable_%d", user.ID)
+	valueButton := fmt.Sprintf("sending_false_%d", user.ID)
 	callbackButton := "👍 Ваша рассылка включена."
 
 	if !user.Sending {
 		nameButton = "✅ Включить рассылку"
-		valueButton = fmt.Sprintf("active_%d", user.ID)
+		valueButton = fmt.Sprintf("sending_true_%d", user.ID)
 		callbackButton = "✋ Ваша рассылка выключена."
 	}
 

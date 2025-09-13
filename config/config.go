@@ -4,10 +4,12 @@ import (
 	"bufio"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 const (
@@ -18,6 +20,7 @@ var TOKEN string
 var URL_BOT string
 var DB_DSN string
 var DB *gorm.DB
+var DEBUG bool = false
 
 type User struct {
 	ID      uint   `gorm:"primarykey"`
@@ -49,9 +52,15 @@ func init() {
 		if strings.Contains(s, "DB_DSN=") {
 			DB_DSN = strings.ReplaceAll(s, "DB_DSN=", "")
 		}
+
+		if strings.Contains(s, "DEBUG=") {
+			DEBUG, _ = strconv.ParseBool(strings.ReplaceAll(s, "DEBUG=", ""))
+		}
 	}
 
-	db, err := gorm.Open(postgres.Open(DB_DSN), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(DB_DSN), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Silent),
+	})
 	if err != nil {
 		log.Fatal("failed to connect database")
 	}

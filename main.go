@@ -49,7 +49,7 @@ func connectWithTg(token string, url string) (*tgbotapi.BotAPI, error) {
 		return nil, err
 	}
 
-	bot.Debug = false
+	bot.Debug = config.DEBUG
 
 	p(3, " ~ ", PL, bot.Self.UserName, url)
 

@@ -1,4 +1,15 @@
-# 🌵 webhook in telegram bot
+# ⚙️ setting for bot
+
+rename `.env.example` on `.env` and update settings for you bot
+
+```
+TOKEN=7969376429:CBEWj2Bm5-if5G194gT7r2kAQjn3MORyhVE
+URL_BOT=https://ysqwp-83-219-149-215.a.free.pinggy.link
+DB_DSN=host=localhost user=www dbname=go_tg_bot password=314159 port=5432 sslmode=disable
+DEBUG=false
+```
+
+## 🌵 webhook in telegram bot
 
 ```
 go mod init

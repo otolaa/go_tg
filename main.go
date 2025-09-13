@@ -12,6 +12,7 @@ import (
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/robfig/cron/v3"
 )
 
 const (
@@ -226,11 +227,45 @@ func setDefaultMessage(bot *tgbotapi.BotAPI, message *tgbotapi.Message) {
 	bot.Send(msg)
 }
 
+// mailing
+func sendMessageEveryone(bot *tgbotapi.BotAPI) {
+	users := config.GetListUsers()
+	quote, _ := stivenking.LoadJsonItems("./stivenking/stiven-king_09-08-2025_12.json")
+	for _, us := range users {
+		msgArr := []string{
+			fmt.Sprintf("%s %s %s → @%s", "🕜", time.Now().Format("15:04:05 ~ 02.01.2006"), Emoji[8], us.Name),
+			SuffixLine,
+			stivenking.GetQuoteRandom(quote),
+		}
+		msg := tgbotapi.NewMessage(us.Tid, strings.Join(msgArr, NS))
+		bot.Send(msg)
+	}
+}
+
+func setCroneStarted(bot *tgbotapi.BotAPI) *cron.Cron {
+	c := cron.New(cron.WithSeconds())
+	// A job to run every 15 seconds ~ "*/15 * * * * *"
+	// A job to run at the start of every hour "0 0 * * * *"
+	// Часы (9:00, 12:00, 18:00, 22:00 UTC). ~ "0 0 9,12,18,22 * * *"
+	// A job to run every day at 07:30:00  "0 30 7 * * *"
+	// job hour every day "0 0 10,11,12,13,14,15,16,17,18,19 * * *"
+	c.AddFunc("*/15 * * * * *", func() {
+		sendMessageEveryone(bot)
+	})
+	c.Start()
+	p(5, " ~ ", PL, "Crone started", "🚀")
+
+	return c
+}
+
 func main() {
 	bot, err := connectWithTg(config.TOKEN, config.URL_BOT)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	c := setCroneStarted(bot)
+	defer c.Stop()
 
 	updates := bot.ListenForWebhook("/" + config.TOKEN)
 	http.HandleFunc("/", setTest)

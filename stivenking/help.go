@@ -50,6 +50,11 @@ func GetQuote() string {
 		return "not found ;("
 	}
 
+	return GetQuoteRandom(quote)
+}
+
+// return random string
+func GetQuoteRandom(quote []ItemJson) string {
 	rand.Seed(time.Now().UnixNano())
 	index := rand.Intn(len(quote))
 
